@@ -1,0 +1,9 @@
+name: JudgmentNight
+version: '${project.version}'
+main: me.piglinstudio.judgmentnight.JudgmentNight
+api-version: '1.16'
+commands:
+    startNight:
+      permission: startNight.permission
+    stopNight:
+      permission: stopNight.permission
