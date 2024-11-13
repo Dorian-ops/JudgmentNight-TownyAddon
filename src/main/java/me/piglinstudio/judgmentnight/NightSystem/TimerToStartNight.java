@@ -32,12 +32,14 @@ public class TimerToStartNight {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-        Long wait = date2.getTime() - date1.getTime();
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                new NightPhase().nightStart();
-            }
-        }.runTaskLater(plugin, wait);
+        Long wait = null;
+        if(date1.getTime() < date2.getTime()){
+            wait = date2.getTime() - date1.getTime();
+        } else if (date1.getTime() > date2.getTime()) {
+            wait = date1.getTime() - date2.getTime();
+        } else {
+            wait = 0L;
+        }
+
     }
 }

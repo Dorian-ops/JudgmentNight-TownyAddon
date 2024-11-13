@@ -1,13 +1,16 @@
 package me.piglinstudio.judgmentnight.NightSystem;
 
-public class NightBolean {
-    private boolean isNight;
+import me.piglinstudio.judgmentnight.JudgmentNight;
+import org.bukkit.configuration.file.YamlConfiguration;
 
+public class NightBolean {
+    private YamlConfiguration yamlConfiguration = JudgmentNight.getCustomYaml();
     public void isNightSet(boolean bolRes){
-        isNight = bolRes;
+        yamlConfiguration.set("isNight", bolRes);
     }
 
     public boolean getterIsNight(){
-        return isNight;
+        boolean isNight = yamlConfiguration.getBoolean("isNight");
+        return  isNight;
     }
 }

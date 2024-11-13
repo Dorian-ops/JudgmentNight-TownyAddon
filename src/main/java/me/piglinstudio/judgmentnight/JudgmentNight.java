@@ -26,9 +26,9 @@ public final class JudgmentNight extends JavaPlugin {
                         "██║░░██║██║░░██║██╔══██╗██║██╔══██║██║╚████║\n" +
                         "██████╔╝╚█████╔╝██║░░██║██║██║░░██║██║░╚███║\n" +
                         "╚═════╝░░╚════╝░╚═╝░░╚═╝╚═╝╚═╝░░╚═╝╚═╝░░╚══╝");
+        System.out.println("https://discord.gg/wyRpJErbZ7");
 
-        getCommand("startNight").setExecutor(new CommandListener());
-        getCommand("stopNight").setExecutor(new CommandListener());
+        getCommand("night").setExecutor(new CommandListener());
         getServer().getPluginManager().registerEvents(new EventHandlers(), this);
 
         if(!getDataFolder().exists()){
@@ -48,6 +48,7 @@ public final class JudgmentNight extends JavaPlugin {
                 customYaml.set("endEventMessage", "&cВнимание ивент судная ночь закончился!");
                 customYaml.set("bossBarMessage", "&cСудная ночь: ");
                 customYaml.set("worldName", "world");
+                customYaml.set("isNight", false);
                 customYaml.save(configFile);
             }
             catch (IOException e){
@@ -55,7 +56,6 @@ public final class JudgmentNight extends JavaPlugin {
             }
         }
         new TimePlaceholder().register();
-        new TimerToStartNight().timerStartToNight();
         new NightBolean().isNightSet(false);
     }
     @Override

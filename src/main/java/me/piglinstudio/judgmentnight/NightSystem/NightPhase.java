@@ -23,8 +23,9 @@ import java.util.List;
 public class NightPhase {
     YamlConfiguration configuration = JudgmentNight.getCustomYaml();
     int countTimer = 0;
-    private BossBar bossBar;
+    private BossBar bossBar = Bukkit.createBossBar("",BarColor.RED, BarStyle.SOLID);;
     private static Plugin plugin = Bukkit.getPluginManager().getPlugin("JudgmentNight");
+    private BukkitRunnable task;
     public void nightStart(){
         boolean isNight = new NightBolean().getterIsNight();
         if(isNight == false){
@@ -39,39 +40,38 @@ public class NightPhase {
                     town.setPVP(true);
                 }
             }
-            isNight = true;
             Bukkit.broadcastMessage(ChatColor.getMsg(configuration.getString("startEventMessage")));
             String bossBarString = configuration.getString("bossBarMessage");
-            bossBar = Bukkit.createBossBar(ChatColor.getMsg(bossBarString),BarColor.RED, BarStyle.SOLID);
-            final int[] onePer = new int[1];
-            onePer[0] = timeToLong % 10;
-            final double[] bossBarProgress = {0.0};
-            new BukkitRunnable() {
+            bossBar.setTitle(ChatColor.getMsg(bossBarString));
+            bossBar.setProgress(1.0);
+            double onePer = timeToLong / 100;
+            new NightBolean().isNightSet(true);
+            task = new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if(world.getTime() < 12000){
+                    if(world.getTime() < 13000 || world.getTime() > 18000 ){
                         world.setTime(13000);
                     }
-                    if(countTimer >= timeToLong){
-                        nightStop();
-                        this.cancel();
-                        return;
-                    }
-                    if(countTimer == onePer[0]){
-                        onePer[0] += onePer[0];
-                        bossBarProgress[0] += 0.1;
-                        bossBar.setProgress(bossBarProgress[0]);
+                    if(onePer == countTimer){
+                        onePerSetValue(onePer);
+                        bossBarProgressValue();
                     }
                     List<Player> players = (List<Player>) Bukkit.getOnlinePlayers();
                     for (int i = 0; i < players.size(); i++){
-                       Player player = players.get(i);
-                       bossBar.addPlayer(player);
+                        Player player = players.get(i);
+                        bossBar.addPlayer(player);
                     }
                     String timeToEndNight = String.valueOf(timeToLong - countTimer);
                     bossBar.setTitle(ChatColor.getMsg(bossBarString + timeToEndNight));
                     countTimer++;
+                    if(countTimer >= timeToLong){
+                        nightStop();
+                        this.cancel();
+                    }
                 }
-            }.runTaskTimer(plugin, 0L, 20L); // 0L - задержка перед началом; 20L - 20 тиктов = 1 секунда
+            };
+            task.runTaskTimer(plugin, 0L, 20L);
+
             DateFormat dateFormatter = new SimpleDateFormat("hh:mm:ss");
             Date today = Calendar.getInstance().getTime();
             String todayAsString = dateFormatter.format(today);
@@ -94,12 +94,42 @@ public class NightPhase {
                     town.setPVP(false);
                 }
             }
-            isNight = false;
+            new NightBolean().isNightSet(false);
             Bukkit.broadcastMessage(ChatColor.getMsg(configuration.getString("endEventMessage")));
             bossBar.removeAll();
+            bossBar.setVisible(false);
+            List<Player> players = bossBar.getPlayers();
+            if(players.size() >= 1){
+                for(int i = 0; i <= players.size(); i++){
+                    Player player = players.get(i);
+                    bossBar.removePlayer(player);
+                }
+            }
+            cancelTask();
+            int timeToLong = configuration.getInt("timeToLong");
+            countTimer =  timeToLong;
+
         }
         else {
             System.out.println("Судная ночь не запущенна");
         }
     }
+
+    private Double onePerSetValue(double onePer){
+        if(onePer != 0){
+            onePer += onePer;
+        }
+        return onePer;
+    }
+    private void bossBarProgressValue(){
+        double bossBarProgress = bossBar.getProgress();
+        bossBarProgress -= 0.01;
+        bossBar.setProgress(bossBarProgress);
+    }
+    public void cancelTask() {
+        if (task != null) {
+            task.cancel();
+        }
+    }
+
 }
